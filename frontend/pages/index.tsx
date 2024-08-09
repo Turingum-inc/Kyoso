@@ -266,8 +266,7 @@ export default function Home() {
   }, [signer]);
 
   return (
-    <div className="flex flex-col items-center bg-slate-100 text-blue-900 min-h-screen">
-      <h2 className="text-6xl font-bold my-12 mt-8">Kyoso</h2>
+    <div className="flex flex-col items-center bg-slate-100 min-h-screen">
       <div className="flex mt-1">
         {account === "" ? (
           <button
@@ -278,21 +277,21 @@ export default function Home() {
           </button>
         ) : (
           <div>
-            <div className="px-2 bg-white border border-gray-400">
-              <span className="font-semibold">{account}</span>
+            <div className="flex items-center my-8">
+              <h2 className="text-3xl font-bold">Kyoso</h2>
               <button
-                className="font-semibold ml-4 my-2 bg-transparent text-blue-700 font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-500 hover:cursor-pointer"
+                className="ml-8 bg-blue-500 text-white font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:bg-blue-400 hover:cursor-pointer"
+                onClick={openCurateModal}
+              >
+                Curate Portfolio
+              </button>
+              <button
+                className="ml-4 bg-transparent text-blue-700 font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-500 hover:cursor-pointer"
                 onClick={() => disConnectWallet()}
               >
                 Logout
               </button>
             </div>
-            <button
-              className="bg-transparent text-blue-700 font-semibold py-2 px-4 my-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-500 hover:cursor-pointer"
-              onClick={openCurateModal}
-            >
-              Curate Portfolio
-            </button>
 
             <p className="py-4"></p>
 
@@ -330,7 +329,7 @@ export default function Home() {
                         Portfolio {index + 1}
                       </h3>
                       <button
-                        className="bg-transparent text-blue-700 font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-500 hover:cursor-pointer"
+                        className="bg-blue-500 text-white font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-400 hover:cursor-pointer"
                         onClick={() => openBuyModal(portfolio)}
                       >
                         Buy
