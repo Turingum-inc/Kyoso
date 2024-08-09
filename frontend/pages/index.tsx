@@ -99,6 +99,18 @@ export default function Home() {
       selectedRatios
     );
 
+    const sum = selectedRatios.reduce(
+      (total, ratio) => total + parseFloat(ratio),
+      0
+    );
+ 
+    if (sum !== 100) {
+      alert("The sum of selectedRatios is not 100.");
+      console.error("The sum of selectedRatios is not 100.");
+    } else {
+      console.log("100");
+    }
+
     const contract = new ethers.Contract(
       process.env.NEXT_PUBLIC_FACTORY_CONTRACT_ADDRESS as string,
       PortfolioFactory.abi,
@@ -329,6 +341,7 @@ export default function Home() {
                     key={index}
                     className="mb-6 bg-purple-100 py-4 px-4 rounded-md"
                   >
+                    <p className="mb-4 font-semibold">Portfolio {index + 1}</p>
                     <button
                       className="bg-blue-500 text-white font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-400 hover:cursor-pointer"
                       onClick={() => openBuyModal(portfolio)}
