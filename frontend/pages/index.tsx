@@ -295,7 +295,8 @@ export default function Home() {
             )}
           </div>
 
-          <p className="py-4"></p>
+          <p className="bg-transparent font-semibold">Performance</p>
+          <p className="py-4">Last XX days</p>
 
           {portfolioData.length > 0 && (
             <div className="w-full max-w-2xl">
@@ -326,10 +327,10 @@ export default function Home() {
                 };
 
                 return (
-                  <div key={index} className="mb-6">
-                    <h3 className="text-lg font-semibold mb-2">
-                      Portfolio {index + 1}
-                    </h3>
+                  <div
+                    key={index}
+                    className="mb-6 bg-purple-100 py-4 px-4 rounded-md"
+                  >
                     <button
                       className="bg-blue-500 text-white font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-400 hover:cursor-pointer"
                       onClick={() => openBuyModal(portfolio)}
