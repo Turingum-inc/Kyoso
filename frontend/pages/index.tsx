@@ -300,7 +300,7 @@ export default function Home() {
             <div className="w-full max-w-2xl">
               {portfolioData.map((portfolio, index) => {
                 const chartData = {
-                  labels: portfolio.tokens[0] || [],
+                  labels: portfolio.tokens[0],
                   datasets: [
                     {
                       label: `Token Ratios - Portfolio ${index + 1}`,
