@@ -455,7 +455,7 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={closeBuyModal}
-                      className="bg-gray-200 text-black py-2 px-4 border rounded hover:bg-gray-600 hover:border-transparent"
+                      className="bg-gray-200 text-black py-2 px-4 border rounded hover:bg-gray-400 hover:border-transparent"
                     >
                       Cancel
                     </button>
