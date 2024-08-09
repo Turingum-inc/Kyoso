@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { coinData, CoinInfo } from "@/utils/data";
+import { coinData } from "@/utils/data";
 import { Chart } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { ethers, BigNumber } from "ethers";
@@ -25,7 +25,8 @@ export default function Home() {
   const [portfolioData, setPortfolioData] = useState<Portfolio[]>([]);
   const [ethAmount, setEthAmount] = useState("");
   const [selectedPortfolio, setSelectedPortfolio] = useState(portfolioData[0]);
-  const [selectedToken, setSelectedToken] = useState<string>("");
+  const [selectedTokens, setSelectedTokens] = useState(Array(5).fill(""));
+  const [selectedRatios, setSelectedRatios] = useState(Array(5).fill(""));
 
   const connectWallet = async () => {
     try {
@@ -62,9 +63,6 @@ export default function Home() {
     setCurateModalOpen(false);
   };
 
-  const [selectedTokens, setSelectedTokens] = useState(Array(5).fill(""));
-  const [ratios, setRatios] = useState(Array(5).fill(""));
-
   // Handle token selection
   const handleTokenChange = (index, event) => {
     const newSelectedTokens = [...selectedTokens];
@@ -74,30 +72,33 @@ export default function Home() {
 
   // Handle ratio input
   const handleRatioChange = (index, event) => {
-    const newRatios = [...ratios];
+    const newRatios = [...selectedRatios];
     newRatios[index] = event.target.value;
-    setRatios(newRatios);
-  };
-
-  const selectedCoin = coinData[selectedToken] || { symbol: "", imageUrl: "" };
-
-  const organizeTokensAndRatios = (selectedTokens) => {
-    const tokens = selectedTokens.map((item) => item.token);
-    const ratios = selectedTokens.map((item) => parseFloat(item.ratio)); // parseFloatを使って数値に変換
-    const totalRatio = ratios.reduce((sum, ratio) => sum + ratio, 0);
-    if (totalRatio !== 100) {
-      alert("Ratios must add up to 100.");
-      throw new Error("Ratios must add up to 100.");
-    }
-
-    return { tokens, ratios };
+    setSelectedRatios(newRatios);
   };
 
   const convertHexToNumber = (hex: string): number => {
     return BigNumber.from(hex).toNumber();
   };
 
-  const curatePortfolio = async (selectedTokens) => {
+  // Method to get contract addresses
+  function getContractAddresses(symbols: string[]): string[] {
+    return symbols.map((symbol) => {
+      const coinInfo = coinData[symbol];
+      if (!coinInfo) {
+        throw new Error(`Unknown token symbol: ${symbol}`);
+      }
+      return coinInfo.contractAddress;
+    });
+  }
+
+  const curatePortfolio = async (selectedTokens, selectedRatios) => {
+    console.log(
+      "selectedTokens, selectedRatios",
+      selectedTokens,
+      selectedRatios
+    );
+
     const contract = new ethers.Contract(
       process.env.NEXT_PUBLIC_FACTORY_CONTRACT_ADDRESS as string,
       PortfolioFactory.abi,
@@ -108,18 +109,17 @@ export default function Home() {
       return;
     }
 
-    try {
-      const { tokens, ratios } = organizeTokensAndRatios(selectedTokens);
+    const contractAddresses = getContractAddresses(selectedTokens);
 
+    try {
       const contractTx = await contract.createPortfolio(
         process.env.NEXT_PUBLIC_PF_NAME as string,
         process.env.NEXT_PUBLIC_PF_SYMBOL as string,
         account, // curator
         process.env.NEXT_PUBLIC_KYOSO_ADDRESS as string, // _kyoso
-        tokens,
-        ratios
+        contractAddresses,
+        selectedRatios
       );
-
       try {
         const res = await contractTx.wait();
         if (res.transactionHash) {
@@ -261,7 +261,7 @@ export default function Home() {
 
   useEffect(() => {
     getAllPortfolios();
-  }, [account]);
+  }, [account, isCuratePendingModalOpen, isPurchasePendingModalOpen]);
 
   return (
     <div className="flex flex-col items-center bg-slate-100 min-h-screen">
@@ -372,16 +372,17 @@ export default function Home() {
                       <div className="flex items-center mt-4 space-x-4">
                         <img
                           src={coinData[selectedTokens[index]].imageUrl}
-                          alt={coinData[selectedTokens[index]].symbol}
+                          alt={coinData[selectedTokens[index]].contractAddress}
                           className="w-5 h-5"
                         />
                         <input
                           type="number"
-                          value={ratios[index]}
+                          value={selectedRatios[index]}
                           onChange={(e) => handleRatioChange(index, e)}
                           className="w-20 px-2 py-1 border border-gray-300 rounded-md"
-                          placeholder="Enter ratio (%)"
+                          placeholder="XX (%)"
                         />
+                        <p>%</p>
                       </div>
                     )}
                   </div>
@@ -398,7 +399,7 @@ export default function Home() {
                   <button
                     type="button"
                     onClick={() => {
-                      curatePortfolio(selectedTokens);
+                      curatePortfolio(selectedTokens, selectedRatios);
                       setCurateModalOpen(false);
                       setCuratePendingModalOpen(true);
                     }}
