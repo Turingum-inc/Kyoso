@@ -263,282 +263,278 @@ export default function Home() {
 
   useEffect(() => {
     getAllPortfolios();
-  }, [signer]);
+  }, [account]);
 
   return (
     <div className="flex flex-col items-center bg-slate-100 min-h-screen">
       <div className="flex mt-1">
-        {account === "" ? (
-          <button
-            className="bg-transparent text-blue-700 font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-500 hover:cursor-pointer"
-            onClick={connectWallet}
-          >
-            Connect to MetaMask
-          </button>
-        ) : (
-          <div>
-            <div className="flex items-center my-8">
-              <h2 className="text-3xl font-bold">Kyoso</h2>
+        <div>
+          <div className="flex items-center my-8">
+            <h2 className="text-3xl font-bold">Kyoso</h2>
+            <button
+              className="ml-24 bg-blue-500 text-white font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:bg-blue-400 hover:cursor-pointer"
+              onClick={openCurateModal}
+              disabled={!account}
+            >
+              Curate Portfolio
+            </button>
+            {account ? (
               <button
-                className="ml-8 bg-blue-500 text-white font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:bg-blue-400 hover:cursor-pointer"
-                onClick={openCurateModal}
-              >
-                Curate Portfolio
-              </button>
-              <button
-                className="ml-4 bg-transparent text-blue-700 font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-500 hover:cursor-pointer"
-                onClick={() => disConnectWallet()}
+                className="bg-transparent text-blue-700 font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-500 hover:cursor-pointer"
+                onClick={disConnectWallet}
               >
                 Logout
               </button>
-            </div>
-
-            <p className="py-4"></p>
-
-            {portfolioData.length > 0 && (
-              <div className="w-full max-w-2xl">
-                {portfolioData.map((portfolio, index) => {
-                  const chartData = {
-                    labels: portfolio.tokens[0] || [],
-                    datasets: [
-                      {
-                        label: `Token Ratios - Portfolio ${index + 1}`,
-                        data: portfolio.ratios[0] || [],
-                        backgroundColor: [
-                          "rgba(255, 99, 132, 0.2)",
-                          "rgba(54, 162, 235, 0.2)",
-                          "rgba(255, 206, 86, 0.2)",
-                          "rgba(75, 192, 192, 0.2)",
-                          "rgba(153, 102, 255, 0.2)",
-                        ],
-                        borderColor: [
-                          "rgba(255, 99, 132, 1)",
-                          "rgba(54, 162, 235, 1)",
-                          "rgba(255, 206, 86, 1)",
-                          "rgba(75, 192, 192, 1)",
-                          "rgba(153, 102, 255, 1)",
-                        ],
-                        borderWidth: 1,
-                      },
-                    ],
-                  };
-
-                  return (
-                    <div key={index} className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">
-                        Portfolio {index + 1}
-                      </h3>
-                      <button
-                        className="bg-blue-500 text-white font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-400 hover:cursor-pointer"
-                        onClick={() => openBuyModal(portfolio)}
-                      >
-                        Buy
-                      </button>
-                      <Chart type="pie" data={chartData} />
-                    </div>
-                  );
-                })}
-              </div>
+            ) : (
+              <button
+                className="bg-transparent text-blue-700 font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-500 hover:cursor-pointer"
+                onClick={connectWallet}
+              >
+                Connect to MetaMask
+              </button>
             )}
+          </div>
 
-            <p className="py-4"></p>
+          <p className="py-4"></p>
 
-            {isCurateModalOpen && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                <div className="bg-white p-6 rounded shadow-lg">
-                  <h2 className="text-xl font-semibold mb-4">
-                    Curate Portfolio
-                  </h2>
+          {portfolioData.length > 0 && (
+            <div className="w-full max-w-2xl">
+              {portfolioData.map((portfolio, index) => {
+                const chartData = {
+                  labels: portfolio.tokens[0] || [],
+                  datasets: [
+                    {
+                      label: `Token Ratios - Portfolio ${index + 1}`,
+                      data: portfolio.ratios[0] || [],
+                      backgroundColor: [
+                        "rgba(255, 99, 132, 0.2)",
+                        "rgba(54, 162, 235, 0.2)",
+                        "rgba(255, 206, 86, 0.2)",
+                        "rgba(75, 192, 192, 0.2)",
+                        "rgba(153, 102, 255, 0.2)",
+                      ],
+                      borderColor: [
+                        "rgba(255, 99, 132, 1)",
+                        "rgba(54, 162, 235, 1)",
+                        "rgba(255, 206, 86, 1)",
+                        "rgba(75, 192, 192, 1)",
+                        "rgba(153, 102, 255, 1)",
+                      ],
+                      borderWidth: 1,
+                    },
+                  ],
+                };
 
-                  {Array.from({ length: 5 }, (_, index) => (
-                    <div key={index} className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Token {index + 1}
-                      </label>
-                      <select
-                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        onChange={(e) => handleTokenChange(e, index)}
-                        value={selectedTokens[index]?.token || ""}
-                      >
-                        <option value="" disabled>
-                          Select token
+                return (
+                  <div key={index} className="mb-6">
+                    <h3 className="text-lg font-semibold mb-2">
+                      Portfolio {index + 1}
+                    </h3>
+                    <button
+                      className="bg-blue-500 text-white font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-400 hover:cursor-pointer"
+                      onClick={() => openBuyModal(portfolio)}
+                    >
+                      Buy
+                    </button>
+                    <Chart type="pie" data={chartData} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <p className="py-4"></p>
+
+          {isCurateModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-6 rounded shadow-lg">
+                <h2 className="text-xl font-semibold mb-4">Curate Portfolio</h2>
+
+                {Array.from({ length: 5 }, (_, index) => (
+                  <div key={index} className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Token {index + 1}
+                    </label>
+                    <select
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      onChange={(e) => handleTokenChange(e, index)}
+                      value={selectedTokens[index]?.token || ""}
+                    >
+                      <option value="" disabled>
+                        Select token
+                      </option>
+                      {/* // TODO: 銘柄の表示 */}
+                      {baseSepoliaContractAddressList.map((address) => (
+                        <option key={address} value={address}>
+                          {address}
                         </option>
-                        {/* // TODO: 銘柄の表示 */}
-                        {baseSepoliaContractAddressList.map((address) => (
-                          <option key={address} value={address}>
-                            {address}
-                          </option>
-                        ))}
-                      </select>
-                      <label className="block text-sm font-medium text-gray-700 mt-2">
-                        Ratio {index + 1}
-                      </label>
-                      <input
-                        type="number"
-                        step="1"
-                        value={selectedTokens[index]?.ratio || ""}
-                        onChange={(e) => handleRatioChange(e, index)}
-                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
-                  ))}
+                      ))}
+                    </select>
+                    <label className="block text-sm font-medium text-gray-700 mt-2">
+                      Ratio {index + 1}
+                    </label>
+                    <input
+                      type="number"
+                      step="1"
+                      value={selectedTokens[index]?.ratio || ""}
+                      onChange={(e) => handleRatioChange(e, index)}
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                ))}
 
-                  <div className="flex justify-between">
+                <div className="flex justify-between">
+                  <button
+                    type="button"
+                    onClick={closeCurateModal}
+                    className="bg-gray-500 text-white font-semibold py-2 px-4 border border-gray-600 rounded hover:bg-gray-600 hover:border-transparent"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      curatePortfolio(selectedTokens);
+                      setCurateModalOpen(false);
+                      setCuratePendingModalOpen(true);
+                    }}
+                    className="bg-blue-500 text-white font-semibold py-2 px-4 border border-blue-600 rounded hover:bg-blue-600 hover:border-transparent"
+                  >
+                    Curate
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isPurchaseModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-6 rounded shadow-lg">
+                <h2 className="text-xl  text-black  font-semibold mb-4">
+                  Purchase Portfolio
+                </h2>
+
+                <div className="bg-blue-100 p-4 rounded-md">
+                  <div className="mb-4 flex">
+                    <input
+                      type="number"
+                      value={ethAmount}
+                      onChange={handleEthAmountChange}
+                      onBlur={handleBlur}
+                      step="any"
+                      className="flex-2 mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    <p className="flex-1 ml-2 mt-3">ETH</p>
+                  </div>
+
+                  <div className="flex flex-col space-y-4">
+                    {selectedPortfolio?.tokens[0].map((token, index) => (
+                      <div key={token} className="flex items-center space-x-4">
+                        <span className="block text-sm font-medium text-gray-700">
+                          {token}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          ({selectedPortfolio.ratios[0][index]}%)
+                        </span>
+                        <p className="px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm text-gray-700">
+                          {calculateTokenEthValue(
+                            selectedPortfolio.ratios[0][index]
+                          ).toFixed(4)}{" "}
+                          ETH
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-between mt-4">
                     <button
                       type="button"
-                      onClick={closeCurateModal}
-                      className="bg-gray-500 text-white font-semibold py-2 px-4 border border-gray-600 rounded hover:bg-gray-600 hover:border-transparent"
+                      onClick={closeBuyModal}
+                      className="bg-gray-200 text-black py-2 px-4 border rounded hover:bg-gray-600 hover:border-transparent"
                     >
-                      Close
+                      Cancel
                     </button>
                     <button
                       type="button"
                       onClick={() => {
-                        curatePortfolio(selectedTokens);
-                        setCurateModalOpen(false);
-                        setCuratePendingModalOpen(true);
+                        buyPortfolio(selectedPortfolio);
+                        setPurchaseModalOpen(false);
+                        setPurchasePendingModalOpen(true);
                       }}
                       className="bg-blue-500 text-white font-semibold py-2 px-4 border border-blue-600 rounded hover:bg-blue-600 hover:border-transparent"
                     >
-                      Curate
+                      Buy
                     </button>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {isPurchaseModalOpen && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                <div className="bg-white p-6 rounded shadow-lg">
-                  <h2 className="text-xl  text-black  font-semibold mb-4">
-                    Purchase Portfolio
-                  </h2>
-
-                  <div className="bg-blue-100 p-4 rounded-md">
-                    <div className="mb-4 flex">
-                      <input
-                        type="number"
-                        value={ethAmount}
-                        onChange={handleEthAmountChange}
-                        onBlur={handleBlur}
-                        step="any"
-                        className="flex-2 mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
-                      <p className="flex-1 ml-2 mt-3">ETH</p>
-                    </div>
-
-                    <div className="flex flex-col space-y-4">
-                      {selectedPortfolio?.tokens[0].map((token, index) => (
-                        <div
-                          key={token}
-                          className="flex items-center space-x-4"
-                        >
-                          <span className="block text-sm font-medium text-gray-700">
-                            {token}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            ({selectedPortfolio.ratios[0][index]}%)
-                          </span>
-                          <p className="px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm text-gray-700">
-                            {calculateTokenEthValue(
-                              selectedPortfolio.ratios[0][index]
-                            ).toFixed(4)}{" "}
-                            ETH
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex justify-between mt-4">
-                      <button
-                        type="button"
-                        onClick={closeBuyModal}
-                        className="bg-gray-200 text-black py-2 px-4 border rounded hover:bg-gray-600 hover:border-transparent"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          buyPortfolio(selectedPortfolio);
-                          setPurchaseModalOpen(false);
-                          setPurchasePendingModalOpen(true);
-                        }}
-                        className="bg-blue-500 text-white font-semibold py-2 px-4 border border-blue-600 rounded hover:bg-blue-600 hover:border-transparent"
-                      >
-                        Buy
-                      </button>
-                    </div>
-                  </div>
+          {isCuratePendingModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-6 rounded shadow-lg text-center">
+                <h2 className="text-xl font-semibold pb-8">
+                  Creating the portfolio. Please wait a moment...
+                </h2>
+                <div className="flex justify-center items-center mb-4">
+                  <svg
+                    className="animate-spin h-8 w-8 text-blue-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    ></path>
+                  </svg>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {isCuratePendingModalOpen && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                <div className="bg-white p-6 rounded shadow-lg text-center">
-                  <h2 className="text-xl font-semibold pb-8">
-                    Creating the portfolio. Please wait a moment...
-                  </h2>
-                  <div className="flex justify-center items-center mb-4">
-                    <svg
-                      className="animate-spin h-8 w-8 text-blue-500"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      ></path>
-                    </svg>
-                  </div>
+          {isPurchasePendingModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-6 rounded shadow-lg text-center">
+                <h2 className="text-xl font-semibold pb-8">
+                  Purchasing the portfolio. Please wait a moment...
+                </h2>
+                <div className="flex justify-center items-center mb-4">
+                  <svg
+                    className="animate-spin h-8 w-8 text-blue-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    ></path>
+                  </svg>
                 </div>
               </div>
-            )}
-
-            {isPurchasePendingModalOpen && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                <div className="bg-white p-6 rounded shadow-lg text-center">
-                  <h2 className="text-xl font-semibold pb-8">
-                    Purchasing the portfolio. Please wait a moment...
-                  </h2>
-                  <div className="flex justify-center items-center mb-4">
-                    <svg
-                      className="animate-spin h-8 w-8 text-blue-500"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      ></path>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
