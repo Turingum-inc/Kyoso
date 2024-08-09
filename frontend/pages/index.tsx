@@ -17,9 +17,6 @@ interface Portfolio {
 export default function Home() {
   const [account, setAccount] = useState("");
   const [signer, setSigner] = useState();
-  const [selectedTokens, setSelectedTokens] = useState(
-    Array(5).fill({ token: "", ratio: "" })
-  );
   const [isCurateModalOpen, setCurateModalOpen] = useState(false);
   const [isCuratePendingModalOpen, setCuratePendingModalOpen] = useState(false);
   const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false);
@@ -29,8 +26,6 @@ export default function Home() {
   const [ethAmount, setEthAmount] = useState("");
   const [selectedPortfolio, setSelectedPortfolio] = useState(portfolioData[0]);
   const [selectedToken, setSelectedToken] = useState<string>("");
-  const [ratio, setRatio] = useState<number>(0);
-  [];
 
   const connectWallet = async () => {
     try {
@@ -54,7 +49,6 @@ export default function Home() {
   const disConnectWallet = async () => {
     try {
       setAccount("");
-      setContract(null);
     } catch (err) {
       console.log(err);
     }
@@ -68,12 +62,21 @@ export default function Home() {
     setCurateModalOpen(false);
   };
 
-  const handleTokenChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedToken(event.target.value);
+  const [selectedTokens, setSelectedTokens] = useState(Array(5).fill(""));
+  const [ratios, setRatios] = useState(Array(5).fill(""));
+
+  // Handle token selection
+  const handleTokenChange = (index, event) => {
+    const newSelectedTokens = [...selectedTokens];
+    newSelectedTokens[index] = event.target.value;
+    setSelectedTokens(newSelectedTokens);
   };
 
-  const handleRatioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRatio(Number(event.target.value));
+  // Handle ratio input
+  const handleRatioChange = (index, event) => {
+    const newRatios = [...ratios];
+    newRatios[index] = event.target.value;
+    setRatios(newRatios);
   };
 
   const selectedCoin = coinData[selectedToken] || { symbol: "", imageUrl: "" };
@@ -353,8 +356,8 @@ export default function Home() {
                     </label>
                     <select
                       className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      onChange={handleTokenChange}
-                      value={selectedToken}
+                      onChange={(e) => handleTokenChange(index, e)}
+                      value={selectedTokens[index]}
                     >
                       <option value="" disabled>
                         Select token
@@ -365,22 +368,17 @@ export default function Home() {
                         </option>
                       ))}
                     </select>
-                    {selectedToken && (
+                    {selectedTokens[index] && (
                       <div className="flex items-center mt-4 space-x-4">
                         <img
-                          src={selectedCoin.imageUrl}
-                          alt={selectedCoin.symbol}
-                          className="w-10 h-10"
+                          src={coinData[selectedTokens[index]].imageUrl}
+                          alt={coinData[selectedTokens[index]].symbol}
+                          className="w-5 h-5"
                         />
-                        <div className="flex-grow">
-                          <span className="font-semibold">
-                            {selectedCoin.symbol}
-                          </span>
-                        </div>
                         <input
                           type="number"
-                          value={ratio}
-                          onChange={handleRatioChange}
+                          value={ratios[index]}
+                          onChange={(e) => handleRatioChange(index, e)}
                           className="w-20 px-2 py-1 border border-gray-300 rounded-md"
                           placeholder="Enter ratio (%)"
                         />
