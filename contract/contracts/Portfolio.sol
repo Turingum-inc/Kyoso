@@ -93,7 +93,7 @@ contract Portfolio is ReentrancyGuard, IPortfolio {
             portfolioData.buyerList.push(msg.sender);
             isBuyer[msg.sender] = true;
         }
-        emit PortfolioBought(msg.sender, address(this), remainAmount);
+        emit PortfolioBought(msg.sender, address(this), amount);
     }
 
     function _calculateDistribution(uint256 ethAmount) internal view returns (uint256 curatorShare, uint256 kyosoShare) {
