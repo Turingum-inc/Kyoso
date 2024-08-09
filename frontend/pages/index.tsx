@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { baseSepoliaContractAddressList } from "@/utils/data";
+import { coinData, CoinInfo } from "@/utils/data";
 import { Chart } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { ethers, BigNumber } from "ethers";
@@ -28,6 +28,9 @@ export default function Home() {
   const [portfolioData, setPortfolioData] = useState<Portfolio[]>([]);
   const [ethAmount, setEthAmount] = useState("");
   const [selectedPortfolio, setSelectedPortfolio] = useState(portfolioData[0]);
+  const [selectedToken, setSelectedToken] = useState<string>("");
+  const [ratio, setRatio] = useState<number>(0);
+  [];
 
   const connectWallet = async () => {
     try {
@@ -65,23 +68,15 @@ export default function Home() {
     setCurateModalOpen(false);
   };
 
-  const handleTokenChange = (e, index) => {
-    const newTokens = [...selectedTokens];
-    newTokens[index] = {
-      ...newTokens[index],
-      token: e.target.value,
-    };
-    setSelectedTokens(newTokens);
+  const handleTokenChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedToken(event.target.value);
   };
 
-  const handleRatioChange = (e, index) => {
-    const newRatios = [...selectedTokens];
-    newRatios[index] = {
-      ...newRatios[index],
-      ratio: e.target.value,
-    };
-    setSelectedTokens(newRatios);
+  const handleRatioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRatio(Number(event.target.value));
   };
+
+  const selectedCoin = coinData[selectedToken] || { symbol: "", imageUrl: "" };
 
   const organizeTokensAndRatios = (selectedTokens) => {
     const tokens = selectedTokens.map((item) => item.token);
@@ -358,29 +353,39 @@ export default function Home() {
                     </label>
                     <select
                       className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      onChange={(e) => handleTokenChange(e, index)}
-                      value={selectedTokens[index]?.token || ""}
+                      onChange={handleTokenChange}
+                      value={selectedToken}
                     >
                       <option value="" disabled>
                         Select token
                       </option>
-                      {/* // TODO: 銘柄の表示 */}
-                      {baseSepoliaContractAddressList.map((address) => (
-                        <option key={address} value={address}>
-                          {address}
+                      {Object.keys(coinData).map((key) => (
+                        <option key={key} value={key}>
+                          {coinData[key].symbol}
                         </option>
                       ))}
                     </select>
-                    <label className="block text-sm font-medium text-gray-700 mt-2">
-                      Ratio {index + 1}
-                    </label>
-                    <input
-                      type="number"
-                      step="1"
-                      value={selectedTokens[index]?.ratio || ""}
-                      onChange={(e) => handleRatioChange(e, index)}
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
+                    {selectedToken && (
+                      <div className="flex items-center mt-4 space-x-4">
+                        <img
+                          src={selectedCoin.imageUrl}
+                          alt={selectedCoin.symbol}
+                          className="w-10 h-10"
+                        />
+                        <div className="flex-grow">
+                          <span className="font-semibold">
+                            {selectedCoin.symbol}
+                          </span>
+                        </div>
+                        <input
+                          type="number"
+                          value={ratio}
+                          onChange={handleRatioChange}
+                          className="w-20 px-2 py-1 border border-gray-300 rounded-md"
+                          placeholder="Enter ratio (%)"
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
 
