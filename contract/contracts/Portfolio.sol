@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol"; // Using OpenZeppelin I
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {IPortfolio} from "./IPortfolio.sol";
+import {IPortfolio} from "./interface/IPortfolio.sol";
 
 interface IUniswapV2Router {
     function swapExactETHForTokens(
