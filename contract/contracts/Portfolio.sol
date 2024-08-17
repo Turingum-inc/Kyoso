@@ -8,20 +8,6 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IPortfolio} from "./IPortfolio.sol";
-// import {ChainlinkPriceFeedSepolia} from "./ChainlinkPriceFeedSepolia.sol";
-
-// https://sepolia.basescan.org/address/0x1689E7B1F10000AE47eBfE339a4f69dECd19F602#writeContract
-// https://sepolia.basescan.org/address/0x94cc0aac535ccdb3c01d6787d6413c739ae12bc4#writeProxyContract
-
-// Base Testnet (Sepolia)
-// universal router: https://sepolia.basescan.org/address/0x050E797f3625EC8785265e1d9BDd4799b97528A1
-// swapRouter: https://sepolia.basescan.org/address/0x94cc0aac535ccdb3c01d6787d6413c739ae12bc4
-// swapExactTokensForTokens
-
-// uniswap v3　
-// Complete the process of swapping remainAmount according to the ratios of the tokens.
-// https://qiita.com/qope/items/2b1352cf3312e7a2aaea#daieth%E3%81%AE%E4%BE%A1%E6%A0%BC%E5%8F%96%E5%BE%97
-// https://qiita.com/ysnrgt/items/428cf365e23473f6cbac
 
 interface IUniswapV2Router {
     function swapExactETHForTokens(
