@@ -16,7 +16,7 @@ interface KyosoProps {}
 
 export function Kyoso({}: KyosoProps) {
   return (
-    <div className="flex justify-between p-6">
+    <div className="flex justify-between p-6 ml-36">
       <div className="space-y-6">
         <div>
           <h2 className="text-lg font-semibold">Performance</h2>
