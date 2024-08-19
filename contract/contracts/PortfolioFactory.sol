@@ -2,7 +2,7 @@
 pragma solidity 0.8.24;
 
 import {Portfolio} from "./Portfolio.sol";
-import {IPortfolioFactory} from "./IPortfolioFactory.sol";
+import {IPortfolioFactory} from "./interface/IPortfolioFactory.sol";
 
 contract PortfolioFactory is IPortfolioFactory {
     PortfolioInfo[] public portfolios;
