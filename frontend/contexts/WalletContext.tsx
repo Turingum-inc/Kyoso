@@ -19,15 +19,16 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({
   const connectWallet = async () => {
     try {
       const { ethereum } = window as any;
-      if (!ethereum) {
-        console.error("MetaMask not installed");
-        return;
-      }
 
-      const accounts = await ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      setAccount(accounts[0]);
+      if (ethereum?.request) {
+        const accounts = await ethereum.request({
+          method: "eth_requestAccounts",
+        });
+
+        setAccount(accounts[0]);
+      } else {
+        console.error("MetaMask not installed");
+      }
 
       const web3Provider = new ethers.providers.Web3Provider(ethereum);
       const signer = web3Provider.getSigner();
