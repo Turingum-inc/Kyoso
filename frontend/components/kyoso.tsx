@@ -35,6 +35,7 @@ export function Kyoso({ account, signer }: KyosoProps) {
   const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false);
   const [isPurchasePendingModalOpen, setPurchasePendingModalOpen] =
     useState(false);
+
   const getAllPortfolios = async () => {
     try {
       const contract = new ethers.Contract(
@@ -47,7 +48,7 @@ export function Kyoso({ account, signer }: KyosoProps) {
         return;
       }
 
-      const result = await contract?.getAllPortfolios();
+      const result = await contract?.getAllPortfolios({});
 
       const portfolios = result.map((item: any) => {
         const portfolioIdArray = item[0];
@@ -64,13 +65,45 @@ export function Kyoso({ account, signer }: KyosoProps) {
       });
       setPortfolioData(portfolios);
     } catch (err) {
-      console.log(err);
+      console.log(
+        "Failed to retrieve portfolios. Please make sure you have created a portfolio in Curate Portfolio.",
+        err
+      );
     }
   };
+
+  console.log("portfolioData", portfolioData);
 
   useEffect(() => {
     getAllPortfolios();
   }, [account, isCuratePendingModalOpen, isPurchasePendingModalOpen]);
+
+  const portfolios = [
+    {
+      curator: "curatorのアドレス",
+      performance: "↑ 15.09%",
+      tokens: ["UNI", "USDC", "Bento"],
+      tokenRatios: ["20%", "20%", "15%"],
+      otherTokens: ["ETH", "HIGHER"],
+      otherTokenRatios: ["30%", "15%"],
+    },
+    {
+      curator: "@shuding",
+      performance: "↑ 12.34%",
+      tokens: ["BTC", "ETH", "LINK"],
+      tokenRatios: ["25%", "20%", "15%"],
+      otherTokens: ["AAVE", "COMP"],
+      otherTokenRatios: ["25%", "5%"],
+    },
+    {
+      curator: "@maxleiter",
+      performance: "↑ 8.76%",
+      tokens: ["SOL", "MATIC", "AVAX"],
+      tokenRatios: ["30%", "20%", "15%"],
+      otherTokens: ["LUNA", "ATOM"],
+      otherTokenRatios: ["20%", "5%"],
+    },
+  ];
 
   return (
     <div className="flex justify-between p-6 ml-36">
@@ -80,123 +113,54 @@ export function Kyoso({ account, signer }: KyosoProps) {
           <p className="text-muted-foreground">Last 7 days</p>
         </div>
         <div className="grid grid-cols-3 gap-4">
-          <Card className="bg-purple-100 p-6">
-            <div className="flex justify-between items-start">
-              <Button variant="default" className="bg-blue-500 text-white">
-                Buy
-              </Button>
-              <div className="flex items-center space-x-2">
-                <UserIcon className="h-5 w-5 text-muted-foreground" />
-                <span>@ariyasu</span>
+          {portfolios.map((portfolio, index) => (
+            <Card key={index} className="bg-purple-100 p-6">
+              <div className="flex justify-between items-start">
+                <Button variant="default" className="bg-blue-500 text-white">
+                  Buy
+                </Button>
+                <div className="flex items-center space-x-2">
+                  <UserIcon className="h-5 w-5 text-muted-foreground" />
+                  <span>{portfolio.curator}</span>
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col items-center mt-4">
-              <PiechartlabelChart className="w-40 h-40" />
-              <div className="text-center mt-4">
-                <p className="text-lg font-semibold">評価損益</p>
-                <p className="text-2xl font-bold text-green-500">↑ 15.09%</p>
+              <div className="flex flex-col items-center mt-4">
+                <PiechartlabelChart className="w-40 h-40" />
+                <div className="text-center mt-4">
+                  <p className="text-lg font-semibold">評価損益</p>
+                  <p className="text-2xl font-bold text-green-500">
+                    {portfolio.performance}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex justify-between mt-6">
-              <div className="text-left space-y-1">
-                <p>UNI</p>
-                <p>USDC</p>
-                <p>Bento</p>
+              <div className="flex justify-between mt-6">
+                <div className="text-left space-y-1">
+                  {portfolio.tokens.map((token, idx) => (
+                    <p key={idx}>{token}</p>
+                  ))}
+                </div>
+                <div className="text-right space-y-1">
+                  {portfolio.tokenRatios.map((ratio, idx) => (
+                    <p key={idx} className="text-green-500">
+                      {ratio}
+                    </p>
+                  ))}
+                </div>
+                <div className="text-right space-y-1">
+                  {portfolio.otherTokens.map((token, idx) => (
+                    <p key={idx}>{token}</p>
+                  ))}
+                </div>
+                <div className="text-right space-y-1">
+                  {portfolio.otherTokenRatios.map((ratio, idx) => (
+                    <p key={idx} className="text-green-500">
+                      {ratio}
+                    </p>
+                  ))}
+                </div>
               </div>
-              <div className="text-right space-y-1">
-                <p className="text-green-500">20%</p>
-                <p className="text-green-500">20%</p>
-                <p className="text-green-500">15%</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p>ETH</p>
-                <p>HIGHER</p>
-                <p className="text-green-500">15%</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-green-500">30%</p>
-                <p className="text-green-500">15%</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="bg-purple-100 p-6">
-            <div className="flex justify-between items-start">
-              <Button variant="default" className="bg-blue-500 text-white">
-                Buy
-              </Button>
-              <div className="flex items-center space-x-2">
-                <UserIcon className="h-5 w-5 text-muted-foreground" />
-                <span>@shuding</span>
-              </div>
-            </div>
-            <div className="flex flex-col items-center mt-4">
-              <PiechartlabelChart className="w-40 h-40" />
-              <div className="text-center mt-4">
-                <p className="text-lg font-semibold">評価損益</p>
-                <p className="text-2xl font-bold text-green-500">↑ 12.34%</p>
-              </div>
-            </div>
-            <div className="flex justify-between mt-6">
-              <div className="text-left space-y-1">
-                <p>BTC</p>
-                <p>ETH</p>
-                <p>LINK</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-green-500">25%</p>
-                <p className="text-green-500">20%</p>
-                <p className="text-green-500">15%</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p>AAVE</p>
-                <p>COMP</p>
-                <p className="text-green-500">10%</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-green-500">25%</p>
-                <p className="text-green-500">5%</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="bg-purple-100 p-6">
-            <div className="flex justify-between items-start">
-              <Button variant="default" className="bg-blue-500 text-white">
-                Buy
-              </Button>
-              <div className="flex items-center space-x-2">
-                <UserIcon className="h-5 w-5 text-muted-foreground" />
-                <span>@maxleiter</span>
-              </div>
-            </div>
-            <div className="flex flex-col items-center mt-4">
-              <PiechartlabelChart className="w-40 h-40" />
-              <div className="text-center mt-4">
-                <p className="text-lg font-semibold">評価損益</p>
-                <p className="text-2xl font-bold text-green-500">↑ 8.76%</p>
-              </div>
-            </div>
-            <div className="flex justify-between mt-6">
-              <div className="text-left space-y-1">
-                <p>SOL</p>
-                <p>MATIC</p>
-                <p>AVAX</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-green-500">30%</p>
-                <p className="text-green-500">20%</p>
-                <p className="text-green-500">15%</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p>LUNA</p>
-                <p>ATOM</p>
-                <p className="text-green-500">10%</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-green-500">20%</p>
-                <p className="text-green-500">5%</p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          ))}
         </div>
       </div>
     </div>
