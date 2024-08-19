@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export function FooterComponent() {
+export function Footer() {
   return (
     <>
       <footer className="bg-muted text-muted-foreground py-4 px-6 w-full">

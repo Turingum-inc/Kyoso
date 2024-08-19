@@ -11,25 +11,13 @@ import {
   ChartContainer,
 } from "@/components/ui/chart";
 import { Pie, PieChart, CartesianGrid, XAxis, Line, LineChart } from "recharts";
-import { ethers } from "ethers";
 
-interface HeaderProps {
-  account: string;
-  signer: ethers.Signer | null;
-  connectWallet: () => void;
-  disConnectWallet: () => void;
-}
+interface KyosoProps {}
 
-export function KyosoComponent({
-  account,
-  signer,
-  connectWallet,
-  disConnectWallet,
-}: HeaderProps) {
+export function Kyoso({}: KyosoProps) {
   return (
     <div className="flex justify-between p-6">
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Kyoso</h1>
         <div>
           <h2 className="text-lg font-semibold">Performance</h2>
           <p className="text-muted-foreground">Last 7 days</p>
@@ -154,31 +142,11 @@ export function KyosoComponent({
           </Card>
         </div>
       </div>
-      <div className="space-x-4">
-        <Button variant="default" className="bg-blue-500 text-white">
-          Curate Portfolio
-        </Button>
-        {account ? (
-          <Button
-            onClick={disConnectWallet}
-            className="bg-blue-500 text-white hover:text-accent"
-          >
-            Disconnect ({account.substring(0, 6)}...{account.slice(-4)})
-          </Button>
-        ) : (
-          <Button
-            onClick={connectWallet}
-            className="bg-green-500 text-white hover:text-accent"
-          >
-            Connect Wallet
-          </Button>
-        )}
-      </div>
     </div>
   );
 }
 
-function LinechartChart(props) {
+function LinechartChart(props: any) {
   return (
     <div {...props}>
       <ChartContainer
@@ -229,7 +197,7 @@ function LinechartChart(props) {
   );
 }
 
-function PiechartlabelChart(props) {
+function PiechartlabelChart(props: any) {
   return (
     <div {...props}>
       <ChartContainer
@@ -284,7 +252,7 @@ function PiechartlabelChart(props) {
   );
 }
 
-function UserIcon(props) {
+function UserIcon(props: any) {
   return (
     <svg
       {...props}
