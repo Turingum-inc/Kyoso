@@ -85,6 +85,7 @@ export function Kyoso({ account, signer }: KyosoProps) {
       <div className="space-y-6">
         <div>
           <h2 className="text-lg font-semibold">Performance</h2>
+          {/* TODO: ポートフォリオ運用期間取得 */}
           <p className="text-muted-foreground">Last 7 days</p>
         </div>
         <div className="grid grid-cols-3 gap-4">
@@ -113,6 +114,37 @@ export function Kyoso({ account, signer }: KyosoProps) {
                   <p className="text-2xl font-bold text-green-500">
                     {performance}
                   </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  {/* Left Area */}
+                  <div className="space-y-2">
+                    {portfolio.tokenAddresses
+                      .slice(0, 3)
+                      .map((address, index) => (
+                        <div key={index} className="flex justify-between">
+                          <span className="text-sm text-gray-700">
+                            {truncateAddress(address)}:
+                          </span>
+                          <span className="text-sm font-bold text-gray-900">
+                            {portfolio.ratios[index]}%
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+
+                  {/* Right Area */}
+                  <div className="space-y-2">
+                    {portfolio.tokenAddresses.slice(3).map((address, index) => (
+                      <div key={index + 3} className="flex justify-between">
+                        <span className="text-sm text-gray-700">
+                          {truncateAddress(address)}:
+                        </span>
+                        <span className="text-sm font-bold text-gray-900">
+                          {portfolio.ratios[index + 3]}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </Card>
