@@ -10,196 +10,160 @@ import {
   ChartTooltip,
   ChartContainer,
 } from "@/components/ui/chart";
-import { Pie, PieChart, CartesianGrid, XAxis, Line, LineChart } from "recharts";
+import { Pie, PieChart } from "recharts";
+import PortfolioFactory from "../contracts/PortfolioFactory.sol/PortfolioFactory.json";
+import { ethers } from "ethers";
+import { FACTORY_CONTRACT_ADDRESS } from "@/lib/constants";
+import { convertHexToNumber, truncateAddress } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
-interface KyosoProps {}
+interface Portfolio {
+  newPortfolios: string[];
+  curators: string[];
+  names: string[];
+  symbols: string[];
+  tokenAddresses: string[];
+  ratios: number[];
+}
 
-export function Kyoso({}: KyosoProps) {
+interface KyosoProps {
+  account: string;
+  signer: ethers.Signer | null;
+}
+
+export function Kyoso({ account, signer }: KyosoProps) {
+  const [portfolioData, setPortfolioData] = useState<Portfolio[]>([]);
+  const [isCurateModalOpen, setCurateModalOpen] = useState(false);
+  const [isCuratePendingModalOpen, setCuratePendingModalOpen] = useState(false);
+  const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false);
+  const [isPurchasePendingModalOpen, setPurchasePendingModalOpen] =
+    useState(false);
+
+  const getAllPortfolios = async () => {
+    try {
+      const contract = new ethers.Contract(
+        FACTORY_CONTRACT_ADDRESS as string,
+        PortfolioFactory.abi,
+        signer as ethers.Signer
+      );
+
+      if (!contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      const result = await contract.getAllPortfolios();
+
+      const portfolios = result.map((item: any) => ({
+        newPortfolios: item[0],
+        curators: item[1],
+        names: item[2],
+        symbols: item[3],
+        tokenAddresses: item[4],
+        ratios: item[5].map((num: any) => convertHexToNumber(num._hex)),
+      }));
+
+      setPortfolioData(portfolios);
+    } catch (err) {
+      console.log(
+        "Failed to retrieve portfolios. Please make sure you have created a portfolio in Curate Portfolio.",
+        err
+      );
+    }
+  };
+
+  console.log("portfolioData", portfolioData);
+
+  useEffect(() => {
+    getAllPortfolios();
+  }, [account, isCuratePendingModalOpen, isPurchasePendingModalOpen]);
+
+  const performance: string = "↑ 12.34%";
+
   return (
     <div className="flex justify-between p-6 ml-36">
       <div className="space-y-6">
         <div>
           <h2 className="text-lg font-semibold">Performance</h2>
+          {/* TODO: ポートフォリオ運用期間取得 */}
           <p className="text-muted-foreground">Last 7 days</p>
         </div>
         <div className="grid grid-cols-3 gap-4">
-          <Card className="bg-purple-100 p-6">
-            <div className="flex justify-between items-start">
-              <Button variant="default" className="bg-blue-500 text-white">
-                Buy
-              </Button>
-              <div className="flex items-center space-x-2">
-                <UserIcon className="h-5 w-5 text-muted-foreground" />
-                <span>@ariyasu</span>
+          {portfolioData.map((portfolio, index) => (
+            <Card key={index} className="bg-purple-100 p-6">
+              <div className="flex justify-between items-start">
+                <Button variant="default" className="bg-blue-500 text-white">
+                  Buy
+                </Button>
+                <div className="flex items-center space-x-2">
+                  <UserIcon className="h-5 w-5 text-muted-foreground" />
+                  <span>{truncateAddress(portfolio.curators)}</span>
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col items-center mt-4">
-              <PiechartlabelChart className="w-40 h-40" />
-              <div className="text-center mt-4">
-                <p className="text-lg font-semibold">評価損益</p>
-                <p className="text-2xl font-bold text-green-500">↑ 15.09%</p>
+              <div className="flex flex-col items-center mt-4">
+                <PiechartlabelChart
+                  data={portfolio.tokenAddresses.map((tokenAddress, i) => ({
+                    browser: tokenAddress, // Token address used as the label
+                    visitors: portfolio.ratios[i], // Corresponding ratio
+                    fill: `hsl(var(--chart-${(i % 5) + 1}))`, // Cycling through colors
+                  }))}
+                  className="w-40 h-40"
+                />
+                <div className="text-center mt-4">
+                  <p className="text-lg font-semibold">評価損益</p>
+                  <p className="text-2xl font-bold text-green-500">
+                    {performance}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  {/* Left Area */}
+                  <div className="space-y-2">
+                    {portfolio.tokenAddresses
+                      .slice(0, 3)
+                      .map((address, index) => (
+                        <div key={index} className="flex justify-between">
+                          <span className="text-sm text-gray-700">
+                            {truncateAddress(address)}:
+                          </span>
+                          <span className="text-sm font-bold text-gray-900">
+                            {portfolio.ratios[index]}%
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+
+                  {/* Right Area */}
+                  <div className="space-y-2">
+                    {portfolio.tokenAddresses.slice(3).map((address, index) => (
+                      <div key={index + 3} className="flex justify-between">
+                        <span className="text-sm text-gray-700">
+                          {truncateAddress(address)}:
+                        </span>
+                        <span className="text-sm font-bold text-gray-900">
+                          {portfolio.ratios[index + 3]}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex justify-between mt-6">
-              <div className="text-left space-y-1">
-                <p>UNI</p>
-                <p>USDC</p>
-                <p>Bento</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-green-500">20%</p>
-                <p className="text-green-500">20%</p>
-                <p className="text-green-500">15%</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p>ETH</p>
-                <p>HIGHER</p>
-                <p className="text-green-500">15%</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-green-500">30%</p>
-                <p className="text-green-500">15%</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="bg-purple-100 p-6">
-            <div className="flex justify-between items-start">
-              <Button variant="default" className="bg-blue-500 text-white">
-                Buy
-              </Button>
-              <div className="flex items-center space-x-2">
-                <UserIcon className="h-5 w-5 text-muted-foreground" />
-                <span>@shuding</span>
-              </div>
-            </div>
-            <div className="flex flex-col items-center mt-4">
-              <PiechartlabelChart className="w-40 h-40" />
-              <div className="text-center mt-4">
-                <p className="text-lg font-semibold">評価損益</p>
-                <p className="text-2xl font-bold text-green-500">↑ 12.34%</p>
-              </div>
-            </div>
-            <div className="flex justify-between mt-6">
-              <div className="text-left space-y-1">
-                <p>BTC</p>
-                <p>ETH</p>
-                <p>LINK</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-green-500">25%</p>
-                <p className="text-green-500">20%</p>
-                <p className="text-green-500">15%</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p>AAVE</p>
-                <p>COMP</p>
-                <p className="text-green-500">10%</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-green-500">25%</p>
-                <p className="text-green-500">5%</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="bg-purple-100 p-6">
-            <div className="flex justify-between items-start">
-              <Button variant="default" className="bg-blue-500 text-white">
-                Buy
-              </Button>
-              <div className="flex items-center space-x-2">
-                <UserIcon className="h-5 w-5 text-muted-foreground" />
-                <span>@maxleiter</span>
-              </div>
-            </div>
-            <div className="flex flex-col items-center mt-4">
-              <PiechartlabelChart className="w-40 h-40" />
-              <div className="text-center mt-4">
-                <p className="text-lg font-semibold">評価損益</p>
-                <p className="text-2xl font-bold text-green-500">↑ 8.76%</p>
-              </div>
-            </div>
-            <div className="flex justify-between mt-6">
-              <div className="text-left space-y-1">
-                <p>SOL</p>
-                <p>MATIC</p>
-                <p>AVAX</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-green-500">30%</p>
-                <p className="text-green-500">20%</p>
-                <p className="text-green-500">15%</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p>LUNA</p>
-                <p>ATOM</p>
-                <p className="text-green-500">10%</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-green-500">20%</p>
-                <p className="text-green-500">5%</p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-function LinechartChart(props: any) {
+function PiechartlabelChart({
+  data,
+  className,
+}: {
+  data: any[];
+  className: string;
+}) {
   return (
-    <div {...props}>
-      <ChartContainer
-        config={{
-          desktop: {
-            label: "Desktop",
-            color: "hsl(var(--chart-1))",
-          },
-        }}
-      >
-        <LineChart
-          accessibilityLayer
-          data={[
-            { month: "January", desktop: 186 },
-            { month: "February", desktop: 305 },
-            { month: "March", desktop: 237 },
-            { month: "April", desktop: 73 },
-            { month: "May", desktop: 209 },
-            { month: "June", desktop: 214 },
-          ]}
-          margin={{
-            left: 12,
-            right: 12,
-          }}
-        >
-          <CartesianGrid vertical={false} />
-          <XAxis
-            dataKey="month"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
-          />
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent hideLabel />}
-          />
-          <Line
-            dataKey="desktop"
-            type="natural"
-            stroke="var(--color-desktop)"
-            strokeWidth={2}
-            dot={false}
-          />
-        </LineChart>
-      </ChartContainer>
-    </div>
-  );
-}
-
-function PiechartlabelChart(props: any) {
-  return (
-    <div {...props}>
+    <div className={className}>
       <ChartContainer
         config={{
           visitors: {
@@ -230,22 +194,7 @@ function PiechartlabelChart(props: any) {
       >
         <PieChart>
           <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-          <Pie
-            data={[
-              { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-              { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-              {
-                browser: "firefox",
-                visitors: 187,
-                fill: "var(--color-firefox)",
-              },
-              { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-              { browser: "other", visitors: 90, fill: "var(--color-other)" },
-            ]}
-            dataKey="visitors"
-            label
-            nameKey="browser"
-          />
+          <Pie data={data} dataKey="visitors" label nameKey="browser" />
         </PieChart>
       </ChartContainer>
     </div>

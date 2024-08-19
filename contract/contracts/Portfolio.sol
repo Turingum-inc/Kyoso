@@ -2,24 +2,14 @@
 pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol"; // Using OpenZeppelin IERC20
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IPortfolio} from "./interface/IPortfolio.sol";
 
-interface IUniswapV2Router {
-    function swapExactETHForTokens(
-        uint256 amountOutMin,
-        address[] calldata path,
-        address to,
-        uint256 deadline
-    ) external payable returns (uint256[] memory amounts);
-}
-
 contract Portfolio is ReentrancyGuard, IPortfolio {
-    PortfolioData internal portfolioData; // If a struct contains a mapping, that struct cannot be directly declared as a public state variable.
+    PortfolioData internal portfolioData;
     mapping(address => bool) public isBuyer;
     
     uint256 public curatorFee = 1; // 1% as a fee
@@ -28,9 +18,6 @@ contract Portfolio is ReentrancyGuard, IPortfolio {
     string public symbol;
     address public curator;
     address public kyoso;
-
-    IUniswapV2Router02 public uniswapRouter;
-    address[] path;
 
     constructor(
         string memory _name,
@@ -72,13 +59,15 @@ contract Portfolio is ReentrancyGuard, IPortfolio {
         _sendDistribution(kyoso, kyosoShare);
 
         uint256 remainAmount = amount - curatorShare - kyosoShare;
-        // TODO: Complete the process of swapping remainAmount according to the ratios of the tokens.
-        // _swapETHForTokens(remainAmount);
 
         if (!isBuyer[msg.sender]) {
             portfolioData.buyerList.push(msg.sender);
             isBuyer[msg.sender] = true;
         }
+
+        // mint ERC20 token
+
+
         emit PortfolioBought(msg.sender, address(this), amount);
     }
 
@@ -91,62 +80,4 @@ contract Portfolio is ReentrancyGuard, IPortfolio {
         payable(to).transfer(amount);
         emit DistributionSent(to, amount);
     }
-
-    function _swapETHForTokens(uint256 ethAmount) internal {
-        uint256 totalRatio = 0;
-        for (uint256 i = 0; i < portfolioData.ratios.length; i++) {
-            totalRatio += portfolioData.ratios[i];
-        }
-
-        for (uint256 i = 0; i < portfolioData.tokenAddresses.length; i++) {
-            uint256 tokenAmount = (ethAmount * portfolioData.ratios[i]) / totalRatio;
-            uint256 swappedAmount = _swapETHForToken(portfolioData.tokenAddresses[i], tokenAmount);
-            _sendErc20(msg.sender, swappedAmount);
-        }
-    }
-
-    function _swapETHForToken(address tokenAddress, uint256 ethAmount) internal returns (uint256) {
-        path[0] = uniswapRouter.WETH();
-        path[1] = tokenAddress;
-
-        uint[] memory amounts = uniswapRouter.swapExactETHForTokens{ value: ethAmount }(
-            0, // Accept any amount of tokens
-            path,
-            address(this),
-            block.timestamp
-        );
-        return amounts[1];
-    }
-
-    function _sendErc20(address to, uint256 amount) internal {
-        IERC20 token = IERC20(to); // Explicitly specify which IERC20 to use
-        token.transfer(to, amount);
-        emit DistributionSent(to, amount);
-    }
-
-    /**
-     * @dev Create a new instance of Portfolio contract.
-     * @param tokenAddress The address of the ERC20 contract.
-     * @param ethAmount The amount of swap Ether
-     */
-    // https://zenn.dev/heku/books/bb6dd5fe02feb7/viewer/4d4b5a
-    function _swapETHForTokenTest(address tokenAddress, uint256 ethAmount) internal returns (uint256) {
-        path[0] = uniswapRouter.WETH();
-        path[1] = tokenAddress;
-
-        uint256 deadline = block.timestamp + 15; // 15 seconds deadline
-
-        uint[] memory amounts = uniswapRouter.swapExactETHForTokens{ value: ethAmount }(
-            0, // Accept any amount of tokens
-            path,
-            address(this), // The contract or msg.sendor()
-            deadline
-        );
-
-        return amounts[1];
-    }
-
-
-    // To receive ETH when `swapExactETHForTokens` is called
-    receive() external payable {}    
 }

@@ -15,7 +15,7 @@ export default function Home() {
         connectWallet={connectWallet}
         disConnectWallet={disConnectWallet}
       />
-      <Kyoso />
+      <Kyoso account={account} signer={signer} />
       <Footer />
     </>
   );
