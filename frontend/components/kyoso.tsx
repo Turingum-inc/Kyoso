@@ -15,14 +15,18 @@ import PortfolioFactory from "../contracts/PortfolioFactory.sol/PortfolioFactory
 import Portfolio from "../contracts/Portfolio.sol/Portfolio.json";
 import { ethers } from "ethers";
 import { FACTORY_CONTRACT_ADDRESS } from "@/lib/constants";
-import { convertHexToNumber } from "@/lib/utils";
+import { convertHexToNumber, truncateAddress } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 interface Portfolio {
-  ids: string[][];
-  tokens: string[][];
+  newPortfolios: string[][];
+  curators: string[][];
+  names: string[][];
+  symbols: string[][];
+  tokenAddresses: string[][];
   ratios: number[][];
 }
+
 interface KyosoProps {
   account: string;
   signer: ethers.Signer | null;
@@ -51,16 +55,22 @@ export function Kyoso({ account, signer }: KyosoProps) {
       const result = await contract?.getAllPortfolios({});
 
       const portfolios = result.map((item: any) => {
-        const portfolioIdArray = item[0];
-        const tokenAddressArray = item[4];
-        const numberArray = item[5].map((num: any) =>
+        const newPortfolioArray = item[0];
+        const curatorArray = item[1];
+        const nameArray = item[2];
+        const symbolArray = item[3];
+        const tokenAddressesArray = item[4];
+        const ratiosArray = item[5].map((num: any) =>
           convertHexToNumber(num._hex)
         );
 
         return {
-          ids: [portfolioIdArray],
-          tokens: [tokenAddressArray],
-          ratios: [numberArray],
+          newPortfolios: [newPortfolioArray],
+          curators: [curatorArray],
+          names: [nameArray],
+          symbols: [symbolArray],
+          tokenAddresses: [tokenAddressesArray],
+          ratios: [ratiosArray],
         };
       });
       setPortfolioData(portfolios);
@@ -78,32 +88,8 @@ export function Kyoso({ account, signer }: KyosoProps) {
     getAllPortfolios();
   }, [account, isCuratePendingModalOpen, isPurchasePendingModalOpen]);
 
-  const portfolios = [
-    {
-      curator: "curatorのアドレス",
-      performance: "↑ 15.09%",
-      tokens: ["UNI", "USDC", "Bento"],
-      tokenRatios: ["20%", "20%", "15%"],
-      otherTokens: ["ETH", "HIGHER"],
-      otherTokenRatios: ["30%", "15%"],
-    },
-    {
-      curator: "@shuding",
-      performance: "↑ 12.34%",
-      tokens: ["BTC", "ETH", "LINK"],
-      tokenRatios: ["25%", "20%", "15%"],
-      otherTokens: ["AAVE", "COMP"],
-      otherTokenRatios: ["25%", "5%"],
-    },
-    {
-      curator: "@maxleiter",
-      performance: "↑ 8.76%",
-      tokens: ["SOL", "MATIC", "AVAX"],
-      tokenRatios: ["30%", "20%", "15%"],
-      otherTokens: ["LUNA", "ATOM"],
-      otherTokenRatios: ["20%", "5%"],
-    },
-  ];
+  // TODO: ポートフォリオ購入後の運用パフォーマンスを計算するロジック
+  const performance: string = "↑ 12.34%";
 
   return (
     <div className="flex justify-between p-6 ml-36">
@@ -113,7 +99,7 @@ export function Kyoso({ account, signer }: KyosoProps) {
           <p className="text-muted-foreground">Last 7 days</p>
         </div>
         <div className="grid grid-cols-3 gap-4">
-          {portfolios.map((portfolio, index) => (
+          {portfolioData.map((portfolio, index) => (
             <Card key={index} className="bg-purple-100 p-6">
               <div className="flex justify-between items-start">
                 <Button variant="default" className="bg-blue-500 text-white">
@@ -121,7 +107,7 @@ export function Kyoso({ account, signer }: KyosoProps) {
                 </Button>
                 <div className="flex items-center space-x-2">
                   <UserIcon className="h-5 w-5 text-muted-foreground" />
-                  <span>{portfolio.curator}</span>
+                  <span>{truncateAddress(portfolio.curators)}</span>
                 </div>
               </div>
               <div className="flex flex-col items-center mt-4">
@@ -129,91 +115,14 @@ export function Kyoso({ account, signer }: KyosoProps) {
                 <div className="text-center mt-4">
                   <p className="text-lg font-semibold">評価損益</p>
                   <p className="text-2xl font-bold text-green-500">
-                    {portfolio.performance}
+                    {performance}
                   </p>
-                </div>
-              </div>
-              <div className="flex justify-between mt-6">
-                <div className="text-left space-y-1">
-                  {portfolio.tokens.map((token, idx) => (
-                    <p key={idx}>{token}</p>
-                  ))}
-                </div>
-                <div className="text-right space-y-1">
-                  {portfolio.tokenRatios.map((ratio, idx) => (
-                    <p key={idx} className="text-green-500">
-                      {ratio}
-                    </p>
-                  ))}
-                </div>
-                <div className="text-right space-y-1">
-                  {portfolio.otherTokens.map((token, idx) => (
-                    <p key={idx}>{token}</p>
-                  ))}
-                </div>
-                <div className="text-right space-y-1">
-                  {portfolio.otherTokenRatios.map((ratio, idx) => (
-                    <p key={idx} className="text-green-500">
-                      {ratio}
-                    </p>
-                  ))}
                 </div>
               </div>
             </Card>
           ))}
         </div>
       </div>
-    </div>
-  );
-}
-
-function LinechartChart(props: any) {
-  return (
-    <div {...props}>
-      <ChartContainer
-        config={{
-          desktop: {
-            label: "Desktop",
-            color: "hsl(var(--chart-1))",
-          },
-        }}
-      >
-        <LineChart
-          accessibilityLayer
-          data={[
-            { month: "January", desktop: 186 },
-            { month: "February", desktop: 305 },
-            { month: "March", desktop: 237 },
-            { month: "April", desktop: 73 },
-            { month: "May", desktop: 209 },
-            { month: "June", desktop: 214 },
-          ]}
-          margin={{
-            left: 12,
-            right: 12,
-          }}
-        >
-          <CartesianGrid vertical={false} />
-          <XAxis
-            dataKey="month"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
-          />
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent hideLabel />}
-          />
-          <Line
-            dataKey="desktop"
-            type="natural"
-            stroke="var(--color-desktop)"
-            strokeWidth={2}
-            dot={false}
-          />
-        </LineChart>
-      </ChartContainer>
     </div>
   );
 }
