@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "./ui/button";
 import { ethers } from "ethers";
 
@@ -22,7 +23,9 @@ export default function Header({
   return (
     <div className="flex w-full items-center justify-between px-36 py-2 shadow-md ">
       <div className="flex justify-between p-6">
-        <h1 className="text-2xl font-bold">Kyoso</h1>
+        <Link href="/">
+          <h1 className="text-2xl font-bold">Kyoso</h1>
+        </Link>
         <div className="space-y-6"></div>
       </div>
       <div className="space-x-4">
