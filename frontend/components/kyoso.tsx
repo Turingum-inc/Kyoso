@@ -10,21 +10,20 @@ import {
   ChartTooltip,
   ChartContainer,
 } from "@/components/ui/chart";
-import { Pie, PieChart, CartesianGrid, XAxis, Line, LineChart } from "recharts";
+import { Pie, PieChart } from "recharts";
 import PortfolioFactory from "../contracts/PortfolioFactory.sol/PortfolioFactory.json";
-import Portfolio from "../contracts/Portfolio.sol/Portfolio.json";
 import { ethers } from "ethers";
 import { FACTORY_CONTRACT_ADDRESS } from "@/lib/constants";
 import { convertHexToNumber, truncateAddress } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 interface Portfolio {
-  newPortfolios: string[][];
-  curators: string[][];
-  names: string[][];
-  symbols: string[][];
-  tokenAddresses: string[][];
-  ratios: number[][];
+  newPortfolios: string[];
+  curators: string[];
+  names: string[];
+  symbols: string[];
+  tokenAddresses: string[];
+  ratios: number[];
 }
 
 interface KyosoProps {
@@ -45,34 +44,25 @@ export function Kyoso({ account, signer }: KyosoProps) {
       const contract = new ethers.Contract(
         FACTORY_CONTRACT_ADDRESS as string,
         PortfolioFactory.abi,
-        signer as any
+        signer as ethers.Signer
       );
+
       if (!contract) {
         console.error("Contract is not initialized");
         return;
       }
 
-      const result = await contract?.getAllPortfolios({});
+      const result = await contract.getAllPortfolios();
 
-      const portfolios = result.map((item: any) => {
-        const newPortfolioArray = item[0];
-        const curatorArray = item[1];
-        const nameArray = item[2];
-        const symbolArray = item[3];
-        const tokenAddressesArray = item[4];
-        const ratiosArray = item[5].map((num: any) =>
-          convertHexToNumber(num._hex)
-        );
+      const portfolios = result.map((item: any) => ({
+        newPortfolios: item[0],
+        curators: item[1],
+        names: item[2],
+        symbols: item[3],
+        tokenAddresses: item[4],
+        ratios: item[5].map((num: any) => convertHexToNumber(num._hex)),
+      }));
 
-        return {
-          newPortfolios: [newPortfolioArray],
-          curators: [curatorArray],
-          names: [nameArray],
-          symbols: [symbolArray],
-          tokenAddresses: [tokenAddressesArray],
-          ratios: [ratiosArray],
-        };
-      });
       setPortfolioData(portfolios);
     } catch (err) {
       console.log(
@@ -88,7 +78,6 @@ export function Kyoso({ account, signer }: KyosoProps) {
     getAllPortfolios();
   }, [account, isCuratePendingModalOpen, isPurchasePendingModalOpen]);
 
-  // TODO: ポートフォリオ購入後の運用パフォーマンスを計算するロジック
   const performance: string = "↑ 12.34%";
 
   return (
@@ -111,7 +100,14 @@ export function Kyoso({ account, signer }: KyosoProps) {
                 </div>
               </div>
               <div className="flex flex-col items-center mt-4">
-                <PiechartlabelChart className="w-40 h-40" />
+                <PiechartlabelChart
+                  data={portfolio.tokenAddresses.map((tokenAddress, i) => ({
+                    browser: tokenAddress, // Token address used as the label
+                    visitors: portfolio.ratios[i], // Corresponding ratio
+                    fill: `hsl(var(--chart-${(i % 5) + 1}))`, // Cycling through colors
+                  }))}
+                  className="w-40 h-40"
+                />
                 <div className="text-center mt-4">
                   <p className="text-lg font-semibold">評価損益</p>
                   <p className="text-2xl font-bold text-green-500">
@@ -127,9 +123,15 @@ export function Kyoso({ account, signer }: KyosoProps) {
   );
 }
 
-function PiechartlabelChart(props: any) {
+function PiechartlabelChart({
+  data,
+  className,
+}: {
+  data: any[];
+  className: string;
+}) {
   return (
-    <div {...props}>
+    <div className={className}>
       <ChartContainer
         config={{
           visitors: {
@@ -160,22 +162,7 @@ function PiechartlabelChart(props: any) {
       >
         <PieChart>
           <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-          <Pie
-            data={[
-              { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-              { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-              {
-                browser: "firefox",
-                visitors: 187,
-                fill: "var(--color-firefox)",
-              },
-              { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-              { browser: "other", visitors: 90, fill: "var(--color-other)" },
-            ]}
-            dataKey="visitors"
-            label
-            nameKey="browser"
-          />
+          <Pie data={data} dataKey="visitors" label nameKey="browser" />
         </PieChart>
       </ChartContainer>
     </div>
