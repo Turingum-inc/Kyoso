@@ -11,10 +11,21 @@ import {
   ChartContainer,
 } from "@/components/ui/chart";
 import { Pie, PieChart, CartesianGrid, XAxis, Line, LineChart } from "recharts";
+import PortfolioFactory from "../contracts/PortfolioFactory.sol/PortfolioFactory.json";
+import Portfolio from "../contracts/Portfolio.sol/Portfolio.json";
+import { ethers } from "ethers";
 
-interface KyosoProps {}
+interface Portfolio {
+  ids: string[][];
+  tokens: string[][];
+  ratios: number[][];
+}
+interface KyosoProps {
+  account: string;
+  signer: ethers.Signer | null;
+}
 
-export function Kyoso({}: KyosoProps) {
+export function Kyoso({ account, signer }: KyosoProps) {
   return (
     <div className="flex justify-between p-6 ml-36">
       <div className="space-y-6">
