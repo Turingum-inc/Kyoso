@@ -14,6 +14,9 @@ import { Pie, PieChart, CartesianGrid, XAxis, Line, LineChart } from "recharts";
 import PortfolioFactory from "../contracts/PortfolioFactory.sol/PortfolioFactory.json";
 import Portfolio from "../contracts/Portfolio.sol/Portfolio.json";
 import { ethers } from "ethers";
+import { FACTORY_CONTRACT_ADDRESS } from "@/lib/constants";
+import { convertHexToNumber } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 interface Portfolio {
   ids: string[][];
@@ -26,6 +29,49 @@ interface KyosoProps {
 }
 
 export function Kyoso({ account, signer }: KyosoProps) {
+  const [portfolioData, setPortfolioData] = useState<Portfolio[]>([]);
+  const [isCurateModalOpen, setCurateModalOpen] = useState(false);
+  const [isCuratePendingModalOpen, setCuratePendingModalOpen] = useState(false);
+  const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false);
+  const [isPurchasePendingModalOpen, setPurchasePendingModalOpen] =
+    useState(false);
+  const getAllPortfolios = async () => {
+    try {
+      const contract = new ethers.Contract(
+        FACTORY_CONTRACT_ADDRESS as string,
+        PortfolioFactory.abi,
+        signer as any
+      );
+      if (!contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      const result = await contract?.getAllPortfolios();
+
+      const portfolios = result.map((item: any) => {
+        const portfolioIdArray = item[0];
+        const tokenAddressArray = item[4];
+        const numberArray = item[5].map((num: any) =>
+          convertHexToNumber(num._hex)
+        );
+
+        return {
+          ids: [portfolioIdArray],
+          tokens: [tokenAddressArray],
+          ratios: [numberArray],
+        };
+      });
+      setPortfolioData(portfolios);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    getAllPortfolios();
+  }, [account, isCuratePendingModalOpen, isPurchasePendingModalOpen]);
+
   return (
     <div className="flex justify-between p-6 ml-36">
       <div className="space-y-6">
